@@ -1,0 +1,60 @@
+clone 下来后
+git submodule update --init --recursive
+
+# 安装
+conda create --name detic python=3.8 -y
+conda activate detic
+conda install pytorch==1.12.0 torchvision==0.13.0 cudatoolkit=11.3 -c pytorch -c conda-forge
+
+有时候会报错，可以根据报错信息，手动安装
+conda install certifi=2022.9.24=pyhd8ed1ab_0 -c conda-forge
+conda install pytorch==1.12.0 torchvision==0.13.0 cudatoolkit=11.3 -c pytorch -c conda-forge
+
+# 需要安装 cuda11.3
+wget https://developer.download.nvidia.com/compute/cuda/11.3.1/local_installers/cuda_11.3.1_465.19.01_linux.run
+sudo sh cuda_11.3.1_465.19.01_linux.run
+记得不要安装驱动
+
+export PATH=/usr/local/cuda-11.3/bin/:$PATH
+nvcc -V
+
+# under your working directory
+git clone git@github.com:facebookresearch/detectron2.git
+cd detectron2
+pip install -e .
+
+cd ..
+pip install -r requirements.txt -i http://pypi.tuna.tsinghua.edu.cn/simple
+
+demo 运行
+
+mkdir models
+wget https://dl.fbaipublicfiles.com/detic/Detic_LCOCOI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.pth -O models/Detic_LCOCOI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.pth
+wget https://web.eecs.umich.edu/~fouhey/fun/desk/desk.jpg
+python demo.py --config-file configs/Detic_LCOCOI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.yaml --input desk.jpg --output out.jpg --vocabulary lvis --opts MODEL.WEIGHTS models/Detic_LCOCOI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.pth
+
+
+# OV-COCO
+wget https://dl.fbaipublicfiles.com/detic/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.pth
+python demo.py --config-file configs/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.yaml --input desk.jpg --output out.jpg --vocabulary coco --opts MODEL.WEIGHTS models/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.pth
+
+
+# 创建 OV-C0C0 数据集 json 参考 https://github.com/alirezazareian/ovr-cnn/blob/master/ipynb/003.ipynb
+
+python tools/get_coco_zeroshot_oriorder.py --data_path datasets/coco/zero-shot/instances_train2017_seen_2.json
+python tools/get_coco_zeroshot_oriorder.py --data_path datasets/coco/zero-shot/instances_val2017_all_2.json
+python tools/get_lvis_cat_info.py --ann datasets/coco/zero-shot/instances_train2017_seen_2_oriorder.json
+
+python train_net.py --num-gpus 1 --config-file configs/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.yaml --eval-only MODEL.WEIGHTS models/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.pth
+
+[03/31 20:38:49 d2.evaluation.coco_evaluation]: Seen bbox AP50: 51.10247076423983
+[03/31 20:38:49 d2.evaluation.coco_evaluation]: Unseen bbox AP50: 27.777340881367763
+[03/31 20:38:49 detectron2]: Evaluation results for coco_generalized_zeroshot_val in csv format:
+[03/31 20:38:49 d2.evaluation.testing]: copypaste: Task: bbox
+[03/31 20:38:49 d2.evaluation.testing]: copypaste: AP,AP50,AP75,APs,APm,APl
+[03/31 20:38:49 d2.evaluation.testing]: copypaste: 27.7590,45.0021,29.4484,13.2801,30.9234,38.8609
+
+python tools/get_cc_tags.py --cc_ann /home/PJLAB/huanghaian/dataset/coco/annotations/captions_train2017.json --out_path datasets/coco/zero-shot/captions_train2017_tags_allcaps.json --allcaps --convert_caption --cat_path /home/PJLAB/huanghaian/dataset/coco/annotations/instances_val2017.json
+
+python train_net.py --num-gpus 1 --config-file configs/BoxSup_OVCOCO_CLIP_R50_1x.yaml
+python train_net.py --num-gpus 1 --config-file configs/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.yaml

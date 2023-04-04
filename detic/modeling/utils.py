@@ -3,6 +3,7 @@ import torch
 import json
 import numpy as np
 from torch.nn import functional as F
+from torch.nn import ModuleList
 
 def load_class_freq(
     path='datasets/metadata/lvis_v1_train_cat_info.json', freq_weight=1.0):
@@ -41,9 +42,18 @@ def reset_cls_test(model, cls_path, num_classes):
     zs_weight = torch.cat(
         [zs_weight, zs_weight.new_zeros((zs_weight.shape[0], 1))], 
         dim=1) # D x (C + 1)
-    if model.roi_heads.box_predictor[0].cls_score.norm_weight:
-        zs_weight = F.normalize(zs_weight, p=2, dim=0)
-    zs_weight = zs_weight.to(model.device)
-    for k in range(len(model.roi_heads.box_predictor)):
-        del model.roi_heads.box_predictor[k].cls_score.zs_weight
-        model.roi_heads.box_predictor[k].cls_score.zs_weight = zs_weight
+
+    if isinstance(model.roi_heads.box_predictor, ModuleList):
+        # cascade
+        if model.roi_heads.box_predictor[0].cls_score.norm_weight:
+            zs_weight = F.normalize(zs_weight, p=2, dim=0)
+        zs_weight = zs_weight.to(model.device)
+        for k in range(len(model.roi_heads.box_predictor)):
+            del model.roi_heads.box_predictor[k].cls_score.zs_weight
+            model.roi_heads.box_predictor[k].cls_score.zs_weight = zs_weight
+    else:
+        if model.roi_heads.box_predictor.cls_score.norm_weight:
+            zs_weight = F.normalize(zs_weight, p=2, dim=0)
+        zs_weight = zs_weight.to(model.device)
+        del model.roi_heads.box_predictor.cls_score.zs_weight
+        model.roi_heads.box_predictor.cls_score.zs_weight = zs_weight

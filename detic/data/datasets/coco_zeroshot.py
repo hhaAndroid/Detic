@@ -5,6 +5,10 @@ from detectron2.data.datasets.register_coco import register_coco_instances
 from detectron2.data.datasets.builtin_meta import _get_builtin_metadata
 from .lvis_v1 import custom_register_lvis_instances
 
+# root_home = '/home/PJLAB/huanghaian/dataset/'
+root_home = ''
+coco_zero_shot = 'datasets/coco_zero_shot/'
+
 categories_seen = [
     {'id': 1, 'name': 'person'},
     {'id': 2, 'name': 'bicycle'},
@@ -93,11 +97,11 @@ def _get_metadata(cat):
         "thing_classes": thing_classes}
 
 _PREDEFINED_SPLITS_COCO = {
-    "coco_zeroshot_train": ("coco/train2017", "coco/zero-shot/instances_train2017_seen_2.json", 'seen'),
-    "coco_zeroshot_val": ("coco/val2017", "coco/zero-shot/instances_val2017_unseen_2.json", 'unseen'),
-    "coco_not_zeroshot_val": ("coco/val2017", "coco/zero-shot/instances_val2017_seen_2.json", 'seen'),
-    "coco_generalized_zeroshot_val": ("coco/val2017", "coco/zero-shot/instances_val2017_all_2_oriorder.json", 'all'),
-    "coco_zeroshot_train_oriorder": ("coco/train2017", "coco/zero-shot/instances_train2017_seen_2_oriorder.json", 'all'),
+    "coco_zeroshot_train": (root_home+"coco/train2017", coco_zero_shot+"instances_train2017_seen_2.json", 'seen'),
+    "coco_zeroshot_val": (root_home+"coco/val2017", coco_zero_shot+"instances_val2017_unseen_2.json", 'unseen'),
+    "coco_not_zeroshot_val": (root_home+"coco/val2017", coco_zero_shot+"instances_val2017_seen_2.json", 'seen'),
+    "coco_generalized_zeroshot_val": (root_home+"coco/val2017", coco_zero_shot+"instances_val2017_all_2_oriorder.json", 'all'),
+    "coco_zeroshot_train_oriorder": (root_home+"coco/train2017", coco_zero_shot+"instances_train2017_seen_2_oriorder.json", 'all'),
 }
 
 for key, (image_root, json_file, cat) in _PREDEFINED_SPLITS_COCO.items():
@@ -110,7 +114,7 @@ for key, (image_root, json_file, cat) in _PREDEFINED_SPLITS_COCO.items():
 
 _CUSTOM_SPLITS_COCO = {
     "cc3m_coco_train_tags": ("cc3m/training/", "cc3m/coco_train_image_info_tags.json"),
-    "coco_caption_train_tags": ("coco/train2017/", "coco/annotations/captions_train2017_tags_allcaps.json"),}
+    "coco_caption_train_tags": (root_home+"coco/train2017/", coco_zero_shot+"captions_train2017_tags_allcaps.json"),}
 
 for key, (image_root, json_file) in _CUSTOM_SPLITS_COCO.items():
     custom_register_lvis_instances(
