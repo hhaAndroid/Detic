@@ -7,7 +7,7 @@ from .lvis_v1 import custom_register_lvis_instances
 
 # root_home = '/home/PJLAB/huanghaian/dataset/'
 root_home = ''
-coco_zero_shot = 'datasets/coco_zero_shot/'
+coco_zero_shot = 'datasets/coco-zero-shot/'
 
 categories_seen = [
     {'id': 1, 'name': 'person'},

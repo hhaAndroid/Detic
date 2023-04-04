@@ -14,7 +14,7 @@ MODEL:
     USE_ZEROSHOT_CLS: True
     ZEROSHOT_WEIGHT_PATH: 'datasets/metadata/coco_clip_a+cname.npy'
     IGNORE_ZERO_CATS: True
-    CAT_FREQ_PATH: 'datasets/coco/zero-shot/instances_train2017_seen_2_oriorder_cat_info.json'
+    CAT_FREQ_PATH: 'datasets/coco-zero-shot/instances_train2017_seen_2_oriorder_cat_info.json'
 DATASETS:
   TRAIN: ("coco_zeroshot_train_oriorder",)
   TEST: ("coco_generalized_zeroshot_val",)

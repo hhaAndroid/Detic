@@ -1,6 +1,6 @@
 import json
 
-annotations_path = 'dataset/coco/annotations/'
+annotations_path = 'datasets/coco/annotations/'
 save_path = 'datasets/coco-zero-shot/'
 
 with open(annotations_path + 'instances_train2017.json', 'r') as fin:
