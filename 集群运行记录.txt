@@ -21,7 +21,11 @@ pip install -r requirements.txt
 验证是否成功
 wget https://web.eecs.umich.edu/~fouhey/fun/desk/desk.jpg
 wget https://dl.fbaipublicfiles.com/detic/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.pth
-python demo.py --config-file configs/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.yaml --input desk.jpg --output out.jpg --vocabulary coco --opts MODEL.WEIGHTS Detic_OVCOCO_CLIP_R50_1x_max-size_caption.pth
+python demo.py --config-file configs/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.yaml --input desk.jpg --output out.jpg --vocabulary coco --opts MODEL.WEIGHTS models/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.pth
+python demo.py --config-file configs/Detic_LCOCOI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.yaml --input desk.jpg --output out.jpg --vocabulary lvis --opts MODEL.WEIGHTS models/Detic_LCOCOI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.pth
+
+python demo.py --config-file configs/Detic_LI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.yaml --input cat.jpg --output out.jpg --vocabulary custom --custom_vocabulary cat --opts MODEL.WEIGHTS models/Detic_LI21k_CLIP_SwinB_896b32_4x_ft4x_max-size.pth
+
 
 # 数据准备
 软链接 coco 数据到 datasets 下
@@ -37,7 +41,14 @@ python tools/get_cc_tags.py --cc_ann datasets/coco/annotations/captions_train201
 评估
 python train_net.py --num-gpus 8 --config-file configs/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.yaml --eval-only MODEL.WEIGHTS Detic_OVCOCO_CLIP_R50_1x_max-size_caption.pth
 
+
 # 第一步训练 bbox_sup
 python train_net.py --num-gpus 8 --config-file configs/BoxSup_OVCOCO_CLIP_R50_1x.yaml
+
 # 第二步训练，需要利用第一步权重
+
+mkdir models
+cd models
+wget https://dl.fbaipublicfiles.com/detic/BoxSup_OVCOCO_CLIP_R50_1x.pth
+cd ..
 python train_net.py --num-gpus 8 --config-file configs/Detic_OVCOCO_CLIP_R50_1x_max-size_caption.yaml
